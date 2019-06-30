@@ -51,9 +51,15 @@ func RunCommand(dir string) {
 
 	err = json.Unmarshal([]byte(file), &cicd)
 
-	nameFile := fmt.Sprintf("%v/src/sbgo/.idea/runConfigurations/%v.xml", os.Getenv("GOPATH"), cicd.Deploy.ServiceName)
+	path := fmt.Sprintf("%v/src/sbgo/.idea/runConfigurations", os.Getenv("GOPATH"))
 
-	writer, err := os.OpenFile(nameFile, os.O_RDWR|os.O_CREATE, 0777)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, os.ModePerm)
+	}
+
+	nameFile := fmt.Sprintf("%v/%v.xml", path, cicd.Deploy.ServiceName)
+
+	writer, err := os.OpenFile(nameFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
 
 	output, err := xml.MarshalIndent(configuration.New(cicd), "  ", "    ")
 	if err != nil {
